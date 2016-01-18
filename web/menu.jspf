@@ -175,7 +175,7 @@ org.opensolaris.opengrok.web.Util"
             // ondblclick="javascript:goFirstProject();"
         %>
         <option value="<%= e.getValue() %>"<%
-            if (pRequested.contains(e.getKey())) {
+            if (pRequested.contains(e.getKey()) || pRequested.isEmpty()) {
             %> selected="selected"<%
             }
             %>><%= e.getValue() %></option><%
