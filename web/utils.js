@@ -83,7 +83,22 @@ function pageReadyMast() {
 }
 
 function domReadyMenu() {
-    var projects = document.projects;
+    var projects = getSelectedProjects();
+    (function($) {
+        $(document).ready(function() {
+            // Select projects depending on cookie value
+            $('select[name=project]')
+              .change(function() {
+                  setSelectedProjects($(this).val());
+              })
+              .find('option').each(function() {
+                  var optionValue = $(this).attr('value');
+                  if($.inArray(optionValue, projects) !== -1 || projects.length === 0) {
+                      $(this).attr('selected', 'selected');
+                  }
+              });
+        });
+    })(jQuery);
     var sbox = document.getElementById('sbox');
 /*
     $("#project").autocomplete(projects, {
@@ -394,7 +409,7 @@ function togglediffs() {
 }
 
 function selectAllProjects() {
-    $("#project *").attr("selected", "selected");
+    $("#project *").attr("selected", "selected").change();
 }
 
 function invertAllProjects() {
@@ -406,7 +421,7 @@ function invertAllProjects() {
                 $(this).attr("selected", "true");
             }
         }
-    );
+    ).change();
 }
 
 function goFirstProject() {
@@ -614,4 +629,36 @@ function googleSymbol(symbol) {
 
 function escapeSingleQuote(string) {
     return string.replace("'", "\\'");
+}
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i<ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1);
+        if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
+    }
+    return "";
+}
+
+function setCookie(cname, cvalue, exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    var expires = "expires="+d.toUTCString();
+    document.cookie = cname + "=" + cvalue + "; " + expires;
+}
+
+function getSelectedProjects() {
+    var selectedProjects = getCookie('OpenGrokProject').replace(/^"|"$/gm,'');
+    return (selectedProjects !== '')?selectedProjects.split(','):[];
+}
+
+function setSelectedProjects(projects) {
+    var selectedProjects = projects;
+    selectedProjects = selectedProjects?selectedProjects.join(','):'';
+    if(projects && projects.length > 1) {
+        selectedProjects = '"' + selectedProjects + '"';
+    }
+    setCookie('OpenGrokProject', selectedProjects);
 }
